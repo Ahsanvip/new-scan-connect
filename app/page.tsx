@@ -27,12 +27,10 @@ export default function HomePage() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link
-              href="/activate"
-              className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-blue-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
-            >
-              Activate Your QR Code
-            </Link>
+            <p className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-blue-600 text-white font-semibold rounded-xl shadow-lg text-center">
+              Have a QR Code? Scan it to activate!
+            </p>
+            <p className="text-sm text-gray-500 mt-2">Or visit antigravity.pk/qr/YOUR-CODE</p>
             <Link
               href="#features"
               className="px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all border border-gray-200"

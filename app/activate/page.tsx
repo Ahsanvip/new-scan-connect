@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { validatePakistanPhone, PAKISTAN_CITIES } from '@/lib/utils';
 
-export default function ActivatePage() {
+function ActivatePageContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const code = searchParams.get('code') || '';
@@ -122,7 +122,7 @@ export default function ActivatePage() {
                                 id="ownerName"
                                 value={formData.ownerName}
                                 onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition text-gray-900"
                                 placeholder="Muhammad Ali"
                             />
                             {errors.ownerName && <p className="text-red-500 text-sm mt-1">{errors.ownerName}</p>}
@@ -140,7 +140,7 @@ export default function ActivatePage() {
                                     value={formData.whatsapp}
                                     onChange={(e) => handlePhoneChange(e.target.value)}
                                     className={`w-full px-4 py-3 rounded-xl border ${phoneValid ? 'border-green-500' : 'border-gray-300'
-                                        } focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition`}
+                                        } focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition text-gray-900`}
                                     placeholder="+92 300 1234567"
                                 />
                                 {phoneValid && (
@@ -161,7 +161,7 @@ export default function ActivatePage() {
                                 id="address"
                                 value={formData.address}
                                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition text-gray-900"
                                 placeholder="Street address (optional)"
                             />
                         </div>
@@ -175,7 +175,7 @@ export default function ActivatePage() {
                                 id="city"
                                 value={formData.city}
                                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition text-gray-900"
                             >
                                 <option value="">Select your city</option>
                                 {PAKISTAN_CITIES.map((city) => (
@@ -195,7 +195,7 @@ export default function ActivatePage() {
                                 id="carRegistration"
                                 value={formData.carRegistration}
                                 onChange={(e) => setFormData({ ...formData, carRegistration: e.target.value.toUpperCase() })}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition font-mono"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition font-mono text-gray-900"
                                 placeholder="ABC-123"
                             />
                             {errors.carRegistration && <p className="text-red-500 text-sm mt-1">{errors.carRegistration}</p>}
@@ -211,7 +211,7 @@ export default function ActivatePage() {
                                 id="carModel"
                                 value={formData.carModel}
                                 onChange={(e) => setFormData({ ...formData, carModel: e.target.value })}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition text-gray-900"
                                 placeholder="Toyota Corolla 2020"
                             />
                             {errors.carModel && <p className="text-red-500 text-sm mt-1">{errors.carModel}</p>}
@@ -254,5 +254,24 @@ export default function ActivatePage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function ActivatePage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="inline-block p-4 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-2xl mb-4">
+                        <svg className="w-12 h-12 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        }>
+            <ActivatePageContent />
+        </Suspense>
     );
 }
