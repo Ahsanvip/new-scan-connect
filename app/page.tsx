@@ -1,6 +1,27 @@
+'use client';
+
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function HomePage() {
+function HomePageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [qrCode, setQrCode] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check for error parameters
+  const error = searchParams.get('error');
+  const errorCode = searchParams.get('code');
+
+  const handleActivate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (qrCode.trim()) {
+      setIsSubmitting(true);
+      router.push(`/qr/${qrCode.trim().toUpperCase()}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
       {/* Hero Section */}
@@ -25,12 +46,67 @@ export default function HomePage() {
             No app required. Privacy-first. Pakistan-optimized.
           </p>
 
+          {/* Error Messages */}
+          {error && (
+            <div className="max-w-md mx-auto mb-6">
+              <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4">
+                <div className="flex items-start">
+                  <svg className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-red-800 mb-1">
+                      {error === 'invalid_code' && 'Invalid QR Code'}
+                      {error === 'missing_code' && 'QR Code Required'}
+                      {error === 'server_error' && 'Server Error'}
+                    </h3>
+                    <p className="text-sm text-red-700">
+                      {error === 'invalid_code' && (
+                        <>
+                          The code <span className="font-mono font-bold">{errorCode || 'provided'}</span> doesn't exist in our system. Please check your code and try again.
+                        </>
+                      )}
+                      {error === 'missing_code' && 'Please enter your QR code below to continue.'}
+                      {error === 'server_error' && 'Unable to connect to the database. Please try again later.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* QR Code Input Form */}
+          <div className="max-w-md mx-auto mb-8">
+            <form onSubmit={handleActivate} className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200 p-6">
+              <label htmlFor="qrCode" className="block text-sm font-medium text-gray-700 mb-2 text-left">
+                Enter Your QR Code
+              </label>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  id="qrCode"
+                  value={qrCode}
+                  onChange={(e) => setQrCode(e.target.value)}
+                  placeholder="e.g., TEST123"
+                  className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition text-gray-900 font-mono uppercase"
+                  disabled={isSubmitting}
+                />
+                <button
+                  type="submit"
+                  disabled={!qrCode.trim() || isSubmitting}
+                  className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {isSubmitting ? '...' : 'Go →'}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2 text-left">
+                Or scan your QR code to be directed automatically
+              </p>
+            </form>
+          </div>
+
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <p className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-blue-600 text-white font-semibold rounded-xl shadow-lg text-center">
-              Have a QR Code? Scan it to activate!
-            </p>
-            <p className="text-sm text-gray-500 mt-2">Or visit antigravity.pk/qr/YOUR-CODE</p>
             <Link
               href="#features"
               className="px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all border border-gray-200"
@@ -153,5 +229,19 @@ export default function HomePage() {
         <p className="text-sm">© 2026 Antigravity QR. Privacy-first vehicle contact system for Pakistan.</p>
       </footer>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <HomePageContent />
+    </Suspense>
   );
 }

@@ -29,6 +29,11 @@ export default async function QRPage({
         // If code is inactive, redirect to activation flow
         redirect(`/activate?code=${upperCode}`);
     } catch (error) {
+        // Re-throw Next.js redirect errors (they use throw internally)
+        if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+            throw error;
+        }
+
         console.error('Error processing QR code:', error);
         redirect(`/?error=server_error`);
     }
