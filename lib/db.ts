@@ -9,7 +9,7 @@ function getSQL() {
     if (!process.env.DATABASE_URL) {
       throw new Error('DATABASE_URL environment variable is required');
     }
-    sql = neon(process.env.DATABASE_URL);
+    sql = neon(process.env.DATABASE_URL.trim());
   }
   return sql;
 }
