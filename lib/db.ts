@@ -161,4 +161,18 @@ export const db = {
       return { allowed: true, remaining: maxRequests };
     }
   },
+
+  /**
+   * Simple connection test
+   */
+  async testConnection() {
+    try {
+      const sql = getSQL();
+      const result = await sql`SELECT 1 as connected` as any[];
+      return result && result.length > 0;
+    } catch (error) {
+      console.error('Connection test failed:', error);
+      throw error;
+    }
+  }
 };
