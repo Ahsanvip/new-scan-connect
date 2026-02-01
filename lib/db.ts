@@ -1,11 +1,18 @@
 import { neon } from '@neondatabase/serverless';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL environment variable is required');
-}
+// Lazy initialization of database connection
+// This allows the build to succeed even if DATABASE_URL is not set
+let sql: ReturnType<typeof neon> | null = null;
 
-// Create Neon serverless SQL client
-export const sql = neon(process.env.DATABASE_URL);
+function getSQL() {
+  if (!sql) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL environment variable is required');
+    }
+    sql = neon(process.env.DATABASE_URL);
+  }
+  return sql;
+}
 
 // Database utility functions
 export const db = {
@@ -13,11 +20,12 @@ export const db = {
    * Check if an activation code exists and get its status
    */
   async getCodeStatus(code: string) {
+    const sql = getSQL();
     const result = await sql`
       SELECT code, used, is_active 
       FROM activation_codes 
       WHERE code = ${code}
-    `;
+    ` as any[];
     return result[0] || null;
   },
 
@@ -25,11 +33,12 @@ export const db = {
    * Get vehicle information by activation code
    */
   async getVehicleByCode(code: string) {
+    const sql = getSQL();
     const result = await sql`
       SELECT v.id, v.whatsapp, v.owner_name, v.car_model, v.car_registration, v.city
       FROM vehicles v
       WHERE v.activation_code = ${code}
-    `;
+    ` as any[];
     return result[0] || null;
   },
 
@@ -45,6 +54,7 @@ export const db = {
     city: string;
   }) {
     try {
+      const sql = getSQL();
       // Start transaction-like operations
       // First, update the activation code
       await sql`
@@ -69,7 +79,7 @@ export const db = {
           ${codeStr}
         )
         RETURNING id
-      `;
+      ` as any[];
 
       return { success: true, vehicleId: result[0].id };
     } catch (error) {
@@ -83,6 +93,7 @@ export const db = {
    */
   async logNotification(vehicleId: string, method: string, reason: string, coords?: string) {
     try {
+      const sql = getSQL();
       await sql`
         INSERT INTO notifications (vehicle_id, method, reason, scanner_coords)
         VALUES (${vehicleId}, ${method}, ${reason}, ${coords || null})
@@ -102,12 +113,13 @@ export const db = {
     const windowStart = new Date(now.getTime() - windowMs);
 
     try {
+      const sql = getSQL();
       // Get current rate limit record
       const existing = await sql`
         SELECT request_count, window_start 
         FROM rate_limits 
         WHERE ip_address = ${ipAddress}
-      `;
+      ` as any[];
 
       if (existing.length === 0) {
         // Create new rate limit record
